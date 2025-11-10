@@ -27,6 +27,7 @@ import MaterialCreate from './components/MaterialCreate';
 import PackagingHierarchyEditor from './components/PackagingHierarchyEditor';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
+import Signup from './components/Signup';
 import Footer from './components/Footer';
 import {
   Menu as MenuIcon,
@@ -37,7 +38,10 @@ import {
   Settings,
   Logout,
   LocalShipping,
+  Brightness4,
+  Brightness7,
 } from '@mui/icons-material';
+import { useThemeMode } from './contexts/ThemeContext';
 
 const AnimatedBox = motion(Box);
 
@@ -46,6 +50,7 @@ function NavBar({ onLogout }) {
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const { mode, toggleTheme } = useThemeMode();
 
   const menuItems = [
     { label: 'Dashboard', icon: DashboardIcon, path: '/' },
@@ -127,6 +132,19 @@ function NavBar({ onLogout }) {
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Tooltip title={mode === 'light' ? 'Dark Mode' : 'Light Mode'}>
+              <IconButton 
+                color="inherit" 
+                onClick={toggleTheme}
+                sx={{
+                  transition: 'transform 0.3s',
+                  '&:hover': { transform: 'rotate(180deg)' },
+                }}
+              >
+                {mode === 'light' ? <Brightness4 /> : <Brightness7 />}
+              </IconButton>
+            </Tooltip>
+
             <Tooltip title="Notifications">
               <IconButton color="inherit">
                 <Badge badgeContent={3} color="error">
@@ -320,9 +338,14 @@ function NavBar({ onLogout }) {
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authView, setAuthView] = useState('login'); // 'login' | 'signup'
 
   if (!isAuthenticated) {
-    return <Login onLogin={() => setIsAuthenticated(true)} />;
+    return authView === 'login' ? (
+      <Login onLogin={() => setIsAuthenticated(true)} onGoSignup={() => setAuthView('signup')} />
+    ) : (
+      <Signup onSignedUp={() => setIsAuthenticated(true)} onGoLogin={() => setAuthView('login')} />
+    );
   }
 
   return (
@@ -337,7 +360,7 @@ export default function App() {
             height: '8px',
           },
           '*::-webkit-scrollbar-track': {
-            background: '#f1f1f1',
+            background: (theme) => theme.palette.mode === 'light' ? '#f1f1f1' : '#1A2027',
           },
           '*::-webkit-scrollbar-thumb': {
             background: '#1976D2',
